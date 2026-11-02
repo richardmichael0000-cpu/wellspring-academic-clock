@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wellspring Academic Week Calendar 2026–27</title>
+<style>
+body{font-family:Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2733}
+.wrap{max-width:1400px;margin:auto;padding:18px}
+.top{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.now{background:#123a55;color:white;padding:16px 20px;border-radius:10px;flex:1;min-width:320px}
+.now small{display:block;text-transform:uppercase;letter-spacing:.08em}
+.now strong{display:block;font-size:34px;margin:4px 0}
+.now .meta{font-size:14px;opacity:.9;margin-top:2px}
+.now .next{font-size:13px;margin-top:10px;line-height:1.45}
+.now .next b{font-weight:700}
+.controls{background:white;border:1px solid #d6dde4;padding:12px;border-radius:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button,select,input{font:inherit;padding:8px;border:1px solid #bcc6d0;border-radius:6px;background:white;color:inherit}
+button{cursor:pointer}
+h1{font-size:34px;margin:8px 0 10px}
+.grid{display:grid;grid-template-columns:145px repeat(7,minmax(0,1fr));background:white;border:1px solid #d6dde4}
+.head{font-weight:700;text-align:center;background:#eef2f5;padding:9px;border-right:1px solid #d6dde4;border-bottom:1px solid #d6dde4}
+.week{background:#123a55;color:white;padding:12px;border-right:1px solid #d6dde4;border-bottom:1px solid #d6dde4}
+.week b{font-size:23px;display:block}
+.week span{font-size:12px;display:block}
+.week em{font-style:normal;font-size:12px;display:inline-block;margin-top:8px;padding:2px 6px;border-radius:4px;background:#ffffff22}
+.week em.none{background:#e4e7eb;color:#123a55;font-weight:700}
+.day{min-height:126px;padding:8px;border-right:1px solid #d6dde4;border-bottom:1px solid #d6dde4;cursor:pointer;overflow-wrap:anywhere}
+.day.off{background:#eceff2}
+.other{background:#fafbfc;color:#9aa3ad}
+.other .ev{opacity:.6}
+.today{outline:4px solid #0f5f7a;outline-offset:-4px}
+.date{font-size:18px;font-weight:800;margin-bottom:5px}
+.date .wd{display:none}
+.ev{font-size:12px;line-height:1.2;padding:4px 5px;border-radius:4px;margin:4px 0}
+.holiday{background:#d9dde2;font-weight:700}
+.exam{background:#ffe0cc}
+.map{background:#fff1a8}
+.event{background:#dceeff}
+.course{background:#e7f4e4}
+.deadline{background:#f6d5dc;font-weight:700}
+.legend{margin-top:10px;font-size:12px;color:#687483;line-height:1.5}
+dialog{border:none;border-radius:10px;box-shadow:0 15px 60px #0004;width:min(520px,92%)}
+dialog h2{margin-top:0}
+.dayitems{margin:0 0 14px}
+.dayitems .row{display:flex;gap:8px;align-items:flex-start;margin:6px 0}
+.dayitems .row .ev{flex:1;margin:0;font-size:13px}
+.dayitems .row .ev small{display:block;font-weight:400;margin-top:3px;color:#46525e}
+.dayitems .row button{padding:4px 8px;font-size:12px}
+.dayitems .tag{font-size:11px;color:#687483;text-transform:uppercase;letter-spacing:.06em;margin:10px 0 2px}
+.formrow{margin:10px 0}
+label{font-weight:700;font-size:13px;display:block;margin-bottom:4px}
+dialog input,dialog select{width:100%;box-sizing:border-box}
+.buttons{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+@media (max-width:760px){
+  .wrap{padding:16px}
+  .now{min-width:0}
+  .now strong{font-size:26px}
+  .controls{width:100%;box-sizing:border-box}
+  h1{font-size:26px}
+  .grid{grid-template-columns:1fr}
+  .head{display:none}
+  .week{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;padding:10px 12px}
+  .week b{font-size:18px;display:inline}
+  .week span{display:inline}
+  .week em{margin-top:0}
+  .day{min-height:0;display:flex;gap:12px;align-items:flex-start;padding:8px 12px}
+  .day.other{display:none}
+  .date{min-width:62px;font-size:16px;margin:2px 0 0}
+  .date .wd{display:inline;font-weight:400;font-size:13px;color:#687483;margin-right:4px}
+  .day .evs{flex:1;min-width:0}
+  .day .ev{margin:0 0 4px}
+}
+@media print{
+  .controls,.legend,dialog{display:none}
+  .wrap{padding:0}
+  .now{border-radius:0}
+  @page{size:A4 landscape;margin:7mm}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="now" id="now"></div>
+    <div class="controls">
+      <button onclick="move(-1)">Previous</button>
+      <select id="monthSel" onchange="idx=+this.value;render()"></select>
+      <button onclick="move(1)">Next</button>
+      <button onclick="goToday()">Today</button>
+      <button onclick="window.print()">Print</button>
+      <button onclick="exportData()">Export my items</button>
+      <button onclick="document.getElementById('imp').click()">Import items</button>
+      <input id="imp" type="file" accept=".json,application/json" hidden onchange="importData(this.files[0]);this.value=''">
+    </div>
+  </div>
+  <h1 id="title"></h1>
+  <div class="grid" id="grid"></div>
+  <div class="legend">
+    Grey = holiday/break (no school) · Orange = exams · Yellow = MAP/testing · Blue = school event · Green = course item · Pink = deadline<br>
+    School dates from the Wellspring Middle School calendar, last checked <span id="updated"></span>. Click a day to see details or add your own items (saved on this device only). Dates may be changed by the school.
+  </div>
+</div>
+
+<dialog id="dlg">
+  <form id="form">
+    <h2 id="dlgTitle"></h2>
+    <div class="dayitems" id="dayItems"></div>
+    <div class="formrow"><label for="txt">Add item</label><input id="txt" placeholder="e.g. Unit 3 test"></div>
+    <div class="formrow"><label for="typ">Type</label>
+      <select id="typ">
+        <option value="course">Course item</option>
+        <option value="deadline">Deadline</option>
+        <option value="event">School event</option>
+        <option value="exam">Exam window</option>
+        <option value="map">MAP/testing</option>
+        <option value="holiday">Holiday/break</option>
+      </select>
+    </div>
+    <div class="formrow"><label for="course">Course / label</label><input id="course" placeholder="GE B2, Pre-AP, Debate"></div>
+    <div class="buttons">
+      <button type="button" onclick="document.getElementById('dlg').close()">Close</button>
+      <button type="submit">Add</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+/* =====================================================================
+   SCHOOL DATES — edit this list when the school changes a date.
+   Format: [start, end (or null for one day), text, type, note (optional)]
+   Types: holiday, exam, map, event, deadline
+   Holidays cover every day in the range. Other ranges skip weekends
+   and holidays. One-day items show on whatever day they fall.
+   ===================================================================== */
+const UPDATED = '2 Nov 2026';
+const SCHOOL = [
+  ['2026-08-01', null, 'Parent and student orientation', 'event'],
+  ['2026-08-03', null, 'Students return', 'event'],
+  ['2026-08-03', '2026-08-07', 'Start New School Year week', 'event'],
+  ['2026-08-12', '2026-08-13', 'Student health screening', 'event'],
+  ['2026-08-14', null, 'WINNOVATOR kick-off', 'event'],
+  ['2026-08-24', '2026-09-11', 'MAP testing', 'map'],
+  ['2026-08-29', '2026-09-02', 'Independence Day break', 'holiday'],
+  ['2026-09-04', null, 'Opening ceremony', 'event'],
+  ['2026-09-25', null, 'Mid-Autumn Festival', 'event'],
+  ['2026-10-05', null, "World Teachers' Day holiday", 'holiday'],
+  ['2026-10-06', '2026-10-16', 'Mid-semester I exams', 'exam'],
+  ['2026-10-15', null, 'Gradebooks and midterm reports due', 'deadline'],
+  ['2026-10-24', null, 'Parent–teacher meetings', 'event'],
+  ['2026-10-30', null, 'Halloween / International Culture Day', 'event', 'Possible class disruption.'],
+  ['2026-11-03', null, 'Mid-semester I reports returned', 'deadline', 'Mid-semester I reports and test files returned.'],
+  ['2026-11-07', null, 'Open Day', 'event', 'Elementary and Middle School Open Day.'],
+  ['2026-11-16', '2026-11-20', 'Teachers Appreciation Week', 'event', 'Includes the demo programme for Grade 5 students.'],
+  ['2026-11-16', '2026-11-17', 'Swimming competition', 'event', 'Run by the sports team.'],
+  ['2026-11-18', null, 'Music Space (3 periods)', 'event', 'Homeroom and music teams. Possible class disruption.'],
+  ['2026-11-23', null, "Vietnamese Teachers' Day holiday", 'holiday'],
+  ['2026-11-24', null, 'Vietnamese Cultural Day holiday', 'holiday'],
+  ['2026-11-28', null, 'Talent HSM scholarship interviews', 'event', 'International Department.'],
+  ['2026-12-01', '2026-12-14', 'Semester I exams', 'exam', 'Normal lessons may be affected.'],
+  ['2026-12-12', null, 'Rise to Middle School (Grade 5)', 'event'],
+  ['2026-12-15', '2026-12-23', 'Spirit Week', 'event', 'Sports tournaments 15, 16 and 21 Dec; Book Day; Christmas 22–23 Dec.'],
+  ['2026-12-17', '2026-12-18', 'WISers Explore', 'event', 'Two-day out-of-class learning activity. Normal lessons likely affected.'],
+  ['2026-12-24', '2026-12-31', 'Winter break', 'holiday'],
+  ['2027-01-01', '2027-01-03', 'New Year holiday', 'holiday'],
+  ['2027-01-04', null, 'Students return', 'event'],
+  ['2027-01-08', null, 'Semester I reports returned', 'deadline', 'Semester I reports and test files returned.'],
+  ['2027-01-16', null, 'Open Day', 'event'],
+  ['2027-01-22', null, 'Spring Festival', 'event', 'Elementary and Grade 6 students only.'],
+  ['2027-02-01', '2027-02-13', 'Lunar New Year holiday', 'holiday'],
+  ['2027-02-15', null, 'Students return', 'event'],
+  ['2027-03-08', '2027-03-19', 'Mid-semester II exams', 'exam'],
+  ['2027-03-13', null, 'Open Day', 'event', 'English team and International Department involved.'],
+  ['2027-03-22', '2027-03-31', 'Grade 9 yearbook photos / sports', 'event'],
+  ['2027-03-29', '2027-04-09', 'MAP testing', 'map'],
+  ['2027-03-30', null, 'Mid-semester II reports returned', 'deadline', 'Mid-semester II reports and test files returned.'],
+  ['2027-04-10', null, 'Insight Day / WINNOVATOR final', 'event'],
+  ['2027-04-16', null, "Hung Kings' Day", 'holiday'],
+  ['2027-04-30', null, 'Reunification Day', 'holiday'],
+  ['2027-05-01', null, 'International Labour Day', 'holiday'],
+  ['2027-05-04', '2027-05-15', 'Semester II exams', 'exam'],
+  ['2027-05-17', '2027-05-21', 'WISers Explore', 'event', 'End-of-year out-of-class activity (film outing).'],
+  ['2027-05-25', null, 'Honour and closing ceremony', 'event'],
+  ['2027-05-27', null, 'Grade 9 graduation and parent meeting', 'event', 'Graduation in the afternoon; parent meeting 16:30–18:00.'],
+  ['2027-05-29', null, 'Closing ceremony for teachers and staff', 'event'],
+  ['2027-05-29', null, 'Student summer holiday begins', 'holiday']
+];
+const LAST_TEACHING_WEEK = '2027-05-24';
+
+/* ===================================================================== */
+
+const START = new Date(2026, 7, 3);
+const MONTHS = [[2026,7],[2026,8],[2026,9],[2026,10],[2026,11],[2027,0],[2027,1],[2027,2],[2027,3],[2027,4]];
+const NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+const KEY = 'wellspringAcademicClock2627.myItems';
+const OLD_KEY = 'wellspringAcademicClock2627';
+const ORDER = {holiday:0, exam:1, map:2, deadline:3, event:4, course:5};
+
+// School dates that were built into the first version of the page.
+// Used once to separate your own saved items from that old built-in list.
+const OLD_SEED = new Set(['2026-08-03|Students return / Start New School Year Week','2026-08-24|MAP testing begins','2026-08-29|Independence Day break','2026-09-02|Independence Day break ends','2026-09-04|Opening ceremony','2026-09-11|MAP testing ends','2026-09-25|Mid-Autumn Festival',"2026-10-05|World Teachers' Day holiday",'2026-10-06|Mid-semester I exams begin','2026-10-15|Gradebooks and midterm reports due','2026-10-16|Mid-semester I exams end','2026-10-24|Parent-teacher meetings','2026-10-30|Halloween / International Culture Day',"2026-11-23|Vietnamese Teachers' Day holiday",'2026-11-24|Vietnamese Cultural Day holiday','2026-12-01|Semester I exams begin','2026-12-14|Semester I exams end','2026-12-24|Winter break begins','2027-01-04|Students return','2027-02-01|Lunar New Year holiday begins','2027-02-13|Lunar New Year holiday ends','2027-02-15|Students return','2027-03-08|Mid-semester II exams begin','2027-03-19|Mid-semester II exams end','2027-03-29|MAP testing begins','2027-04-09|MAP testing ends',"2027-04-16|Hung Kings' Day holiday",'2027-04-30|Reunification Day','2027-05-01|International Labor Day','2027-05-04|Semester II exams begin','2027-05-15|Semester II exams end','2027-05-25|Honor and closing ceremony','2027-05-27|Grade 9 graduation and parent meeting','2027-05-29|Student summer holiday begins']);
+
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function parse(s){const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
+function isWeekend(d){const g=d.getDay();return g===0||g===6}
+function mon(d){const x=new Date(d),n=(x.getDay()+6)%7;x.setDate(x.getDate()-n);x.setHours(0,0,0,0);return x}
+function wk(d){return Math.round((mon(d)-START)/604800000)+1}
+function fmt(d,opts){return d.toLocaleDateString('en-GB',opts)}
+function range(m){const s=new Date(m);s.setDate(s.getDate()+6);return fmt(m,{day:'numeric',month:'short'})+' – '+fmt(s,{day:'numeric',month:'short'})}
+function eachDay(start,end,fn){const d=parse(start),e=parse(end||start);for(;d<=e;d.setDate(d.getDate()+1))fn(new Date(d))}
+
+// Expand school ranges into individual days
+const offDays = new Set();
+SCHOOL.forEach(([a,b,,type])=>{if(type==='holiday')eachDay(a,b,d=>offDays.add(iso(d)))});
+const schoolByDate = {};
+SCHOOL.forEach(([a,b,text,type,note])=>{
+  eachDay(a,b,d=>{
+    const k=iso(d);
+    if(b && type!=='holiday' && (isWeekend(d)||offDays.has(k))) return;
+    (schoolByDate[k]=schoolByDate[k]||[]).push({text,type,note:note||''});
+  });
+});
+Object.values(schoolByDate).forEach(a=>a.sort((x,y)=>ORDER[x.type]-ORDER[y.type]));
+
+function schoolDays(monday){
+  if(monday<START || monday>parse(LAST_TEACHING_WEEK)) return null;
+  let n=0;
+  for(let i=0;i<5;i++){const d=new Date(monday);d.setDate(d.getDate()+i);if(!offDays.has(iso(d)))n++}
+  return n;
+}
+function daysLabel(n){return n===0?'No school':n+' school day'+(n===1?'':'s')}
+
+// Your own items: saved in this browser only
+function readStore(k){try{return localStorage.getItem(k)}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(mine))}catch(e){}}
+function isSchoolItem(date,text){
+  if(OLD_SEED.has(date+'|'+text)) return true;
+  return (schoolByDate[date]||[]).some(s=>s.text===text);
+}
+function cleanItems(obj){
+  const out={};
+  if(!obj||typeof obj!=='object') return out;
+  Object.entries(obj).forEach(([date,arr])=>{
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Array.isArray(arr)) return;
+    arr.forEach(e=>{
+      if(!e||typeof e.text!=='string'||!e.text.trim()) return;
+      if(isSchoolItem(date,e.text)) return;
+      const item={text:e.text.trim(),type:ORDER[e.type]!==undefined?e.type:'course',course:typeof e.course==='string'?e.course.trim():''};
+      (out[date]=out[date]||[]).push(item);
+    });
+  });
+  return out;
+}
+function loadMine(){
+  const s=readStore(KEY);
+  if(s){try{return cleanItems(JSON.parse(s))}catch(e){return {}}}
+  // First visit after the update: keep anything you added to the old version
+  let migrated={};
+  const old=readStore(OLD_KEY);
+  if(old){try{migrated=cleanItems(JSON.parse(old))}catch(e){}}
+  try{localStorage.setItem(KEY,JSON.stringify(migrated))}catch(e){}
+  return migrated;
+}
+let mine = loadMine();
+
+let idx = (()=>{const n=new Date(),i=MONTHS.findIndex(([y,m])=>y===n.getFullYear()&&m===n.getMonth());if(i>=0)return i;return n<START?0:MONTHS.length-1})();
+let selected = null;
+
+function chip(e,withCourse){
+  const x=document.createElement('div');
+  x.className='ev '+e.type;
+  x.textContent=(withCourse&&e.course?e.course+': ':'')+e.text;
+  if(e.note) x.title=e.note;
+  return x;
+}
+
+function renderNow(){
+  const n=new Date(),m=mon(n),today=iso(n),box=document.getElementById('now');
+  box.innerHTML='';
+  const s=document.createElement('small');s.textContent='Now';box.appendChild(s);
+  const w=document.createElement('strong');w.textContent='ACADEMIC WEEK '+wk(n);box.appendChild(w);
+  const r=document.createElement('div');r.textContent=range(m);box.appendChild(r);
+  const c=schoolDays(m);
+  if(c!==null){const meta=document.createElement('div');meta.className='meta';meta.textContent=daysLabel(c)+' this week';box.appendChild(meta)}
+  const upcoming=SCHOOL.filter(s=>(s[1]||s[0])>=today).sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0).slice(0,3);
+  if(upcoming.length){
+    const nx=document.createElement('div');nx.className='next';
+    const lab=document.createElement('b');lab.textContent='Coming up: ';nx.appendChild(lab);
+    nx.appendChild(document.createTextNode(upcoming.map(([a,b,text])=>{
+      const when=a<today?'until '+fmt(parse(b),{weekday:'short',day:'numeric',month:'short'}):fmt(parse(a),{weekday:'short',day:'numeric',month:'short'});
+      return when+' · '+text;
+    }).join('  |  ')));
+    box.appendChild(nx);
+  }
+}
+
+function buildSelect(){
+  const s=document.getElementById('monthSel');s.innerHTML='';
+  MONTHS.forEach(([y,m],i)=>{const o=document.createElement('option');o.value=i;o.textContent=NAMES[m]+' '+y;o.selected=i===idx;s.appendChild(o)});
+}
+
+function render(){
+  buildSelect();
+  const [y,m]=MONTHS[idx];
+  document.getElementById('title').textContent=NAMES[m]+' '+y;
+  const g=document.getElementById('grid');g.innerHTML='';
+  ['Academic week',...DAYS].forEach(x=>{const h=document.createElement('div');h.className='head';h.textContent=x;g.appendChild(h)});
+  const first=new Date(y,m,1),last=new Date(y,m+1,0),a=mon(first),z=mon(last);z.setDate(z.getDate()+6);
+  const todayStr=new Date().toDateString();
+  for(let wday=new Date(a);wday<=z;wday.setDate(wday.getDate()+7)){
+    const wc=document.createElement('div');wc.className='week';
+    const b=document.createElement('b');b.textContent='WEEK '+wk(wday);wc.appendChild(b);
+    const sp=document.createElement('span');sp.textContent=range(wday);wc.appendChild(sp);
+    const c=schoolDays(wday);
+    if(c!==null){const em=document.createElement('em');em.textContent=daysLabel(c);if(c===0)em.className='none';wc.appendChild(em)}
+    g.appendChild(wc);
+    for(let j=0;j<7;j++){
+      const d=new Date(wday);d.setDate(wday.getDate()+j);
+      const k=iso(d),cell=document.createElement('div');
+      cell.className='day'+(d.getMonth()!==m?' other':'')+(offDays.has(k)?' off':'');
+      if(d.toDateString()===todayStr)cell.classList.add('today');
+      const dt=document.createElement('div');dt.className='date';
+      const wd=document.createElement('span');wd.className='wd';wd.textContent=DAYS[j].slice(0,3);
+      dt.appendChild(wd);dt.appendChild(document.createTextNode(d.getDate()));
+      cell.appendChild(dt);
+      const evs=document.createElement('div');evs.className='evs';
+      (schoolByDate[k]||[]).forEach(e=>evs.appendChild(chip(e,false)));
+      (mine[k]||[]).forEach(e=>evs.appendChild(chip(e,true)));
+      cell.appendChild(evs);
+      cell.onclick=()=>openDlg(k);
+      g.appendChild(cell);
+    }
+  }
+}
+
+function renderDayItems(){
+  const box=document.getElementById('dayItems');box.innerHTML='';
+  const school=schoolByDate[selected]||[],own=mine[selected]||[];
+  if(school.length){
+    const t=document.createElement('div');t.className='tag';t.textContent='School';box.appendChild(t);
+    school.forEach(e=>{
+      const row=document.createElement('div');row.className='row';
+      const c=chip(e,false);c.removeAttribute('title');
+      if(e.note){const n=document.createElement('small');n.textContent=e.note;c.appendChild(n)}
+      row.appendChild(c);box.appendChild(row);
+    });
+  }
+  if(own.length){
+    const t=document.createElement('div');t.className='tag';t.textContent='Your items';box.appendChild(t);
+    own.forEach((e,i)=>{
+      const row=document.createElement('div');row.className='row';
+      row.appendChild(chip(e,true));
+      const del=document.createElement('button');del.type='button';del.textContent='Delete';
+      del.onclick=()=>{own.splice(i,1);if(!own.length)delete mine[selected];save();renderDayItems();render()};
+      row.appendChild(del);box.appendChild(row);
+    });
+  }
+}
+
+function openDlg(k){
+  selected=k;
+  document.getElementById('dlgTitle').textContent=parse(k).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('txt').value='';
+  document.getElementById('typ').value='course';
+  document.getElementById('course').value='';
+  renderDayItems();
+  document.getElementById('dlg').showModal();
+}
+
+document.getElementById('form').addEventListener('submit',e=>{
+  e.preventDefault();
+  const t=document.getElementById('txt').value.trim();
+  if(!t){document.getElementById('txt').focus();return}
+  (mine[selected]=mine[selected]||[]).push({text:t,type:document.getElementById('typ').value,course:document.getElementById('course').value.trim()});
+  save();render();
+  document.getElementById('dlg').close();
+});
+
+function move(n){idx=Math.max(0,Math.min(MONTHS.length-1,idx+n));render()}
+function goToday(){const n=new Date(),i=MONTHS.findIndex(([y,m])=>y===n.getFullYear()&&m===n.getMonth());if(i>=0){idx=i;render()}}
+
+function exportData(){
+  const b=new Blob([JSON.stringify(mine,null,2)],{type:'application/json'}),a=document.createElement('a');
+  a.href=URL.createObjectURL(b);a.download='wellspring-calendar-my-items.json';
+  document.body.appendChild(a);a.click();a.remove();
+}
+function importData(f){
+  if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    let incoming;
+    try{incoming=cleanItems(JSON.parse(r.result))}catch(e){alert('That file isn’t a calendar export.');return}
+    let added=0;
+    Object.entries(incoming).forEach(([date,arr])=>{
+      const list=mine[date]=mine[date]||[];
+      arr.forEach(e=>{if(!list.some(x=>x.text===e.text&&x.type===e.type&&x.course===e.course)){list.push(e);added++}});
+      if(!list.length)delete mine[date];
+    });
+    save();render();
+    alert(added?'Imported '+added+' item'+(added===1?'':'s')+'.':'Nothing new to import.');
+  };
+  r.readAsText(f);
+}
+
+document.getElementById('updated').textContent=UPDATED;
+renderNow();
+render();
+</script>
+</body>
+</html>
