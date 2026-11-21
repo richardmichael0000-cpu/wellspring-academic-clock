@@ -98,7 +98,7 @@ dialog input,dialog select{width:100%;box-sizing:border-box}
   <div class="grid" id="grid"></div>
   <div class="legend">
     Grey = holiday/break (no school) · Orange = exams · Yellow = MAP/testing · Blue = school event · Green = course item · Pink = deadline<br>
-    School dates from the Wellspring Middle School calendar and the Final Exam Planning (5 Nov), Class Cancellations (6 Nov) and Final Exam Schedule (17 Nov) emails, last checked <span id="updated"></span>. Click a day to see details or add your own items (saved on this device only). Dates may be changed by the school.
+    School dates from the Wellspring Middle School calendar and the Final Exam Planning (5 Nov), Class Cancellations (6 Nov) and Final Exam Schedule (17 Nov, updated 20 Nov) emails, last checked <span id="updated"></span>. Click a day to see details or add your own items (saved on this device only). Dates may be changed by the school.
   </div>
 </div>
 
@@ -133,7 +133,7 @@ dialog input,dialog select{width:100%;box-sizing:border-box}
    Holidays cover every day in the range. Other ranges skip weekends
    and holidays. One-day items show on whatever day they fall.
    ===================================================================== */
-const UPDATED = '17 Nov 2026';
+const UPDATED = '21 Nov 2026';
 const SCHOOL = [
   ['2026-08-01', null, 'Parent and student orientation', 'event'],
   ['2026-08-03', null, 'Students return', 'event'],
@@ -164,12 +164,17 @@ const SCHOOL = [
   ['2026-11-23', '2026-11-27', 'Final exam review week', 'event', 'All classes review; no new content. 23–24 Nov are holidays.'],
   ['2026-11-28', null, 'Talent HSM scholarship interviews', 'event', 'International Department.'],
   ['2026-11-17', null, 'Semester 1 final exam schedule released', 'event', 'Mark sent Final Exam Schedule Semester 1 2627.xlsx. Extra proctoring is on its last tab. Report any errors to Mark.'],
-  ['2026-12-01', '2026-12-14', 'Semester I exams', 'exam', 'International exams 1–4 Dec; speaking exams run into 7–8 Dec; Vietnamese exams the week of 7 Dec. If one of your classes has an exam in your lesson slot, you proctor it; otherwise teach as normal. After a class has sat its final: end-of-semester projects or start Semester 2 material (this work can still go in the gradebook). Give at least one lesson to reviewing the final with each class: papers back, mistakes, hard questions.'],
+  ['2026-11-20', null, 'Exam schedule updated: Vietnamese exams added', 'event', 'Mark posted the revised Final Exam Schedule Semester 1 2627.xlsx in Teams (Week 19 tab). No extra proctoring listed for Week 19.'],
+  ['2026-12-01', '2026-12-14', 'Semester I exams', 'exam', 'International exams 1–4 Dec; speaking exams 3–9 Dec (mostly Mon 7 Dec); Vietnamese exams 8–10 Dec. If one of your classes has an exam in your lesson slot, you proctor it; otherwise teach as normal. After a class has sat its final: end-of-semester projects or start Semester 2 material (this work can still go in the gradebook). Give at least one lesson to reviewing the final with each class: papers back, mistakes, hard questions.'],
   ['2026-12-01', null, 'ESL final exam', 'exam', 'All grades, P7–8 (12:40–13:50).'],
   ['2026-12-02', null, 'Science final exam', 'exam', 'Grades 6–8 only, P7–8 (12:40–13:50).'],
   ['2026-12-03', null, 'ELA final exam', 'exam', 'Grade 9: P3–4 (9:10–10:20). Grades 6–8: P7–8 (12:40–13:50).'],
   ['2026-12-04', null, 'Math final exam', 'exam', 'Grades 6–8: P3–4 (9:10–10:20). Grade 9: P7–8 (12:40–13:50).'],
-  ['2026-12-07', '2026-12-11', 'Vietnamese subject exams', 'exam', 'Schedule not released yet; Mark will send a revised spreadsheet. Lessons this week (after Monday) may change.'],
+  ['2026-12-07', null, 'Speaking exams (all grades)', 'exam', 'Grades 6–9, spread across P1–10. Also Chinese exams for 9AD (P5–6), 9MT1 (P7–8), 9MT2 (P9–10).'],
+  ['2026-12-08', null, 'Vietnamese History exam (Grades 6–8)', 'exam', 'P3–4, 9:15–10:15. Grade 9 does not sit this one.'],
+  ['2026-12-08', null, 'Vietnamese Science exam (all grades)', 'exam', 'P7–8, 12:45–13:45. Every class in Grades 6–9.'],
+  ['2026-12-09', null, 'Vietnamese Literature exam (all grades)', 'exam', 'P3–4. Grades 6–7: 9:15–10:35. Grades 8–9: 9:10–10:40. Runs past the end of P3–4 (10:20), so P5–6 starts late.'],
+  ['2026-12-10', null, 'Vietnamese Math exam (all grades)', 'exam', 'P3–4. Grades 6–7: 9:15–10:35. Grades 8–9: 9:10–10:40. Runs past the end of P3–4 (10:20), so P5–6 starts late.'],
   ['2026-12-12', null, 'Rise to Middle School (Grade 5)', 'event'],
   ['2026-12-15', '2026-12-23', 'Spirit Week', 'event', 'Sports tournaments 15, 16 and 21 Dec; Book Day; Christmas 22–23 Dec.'],
   ['2026-12-17', '2026-12-18', 'WISers Explore', 'event', 'Two-day out-of-class learning activity. Normal lessons likely affected.'],
@@ -212,7 +217,10 @@ const COURSES = [
   ['2026-12-03', null, 'Exam duty', '9AB6 ELA exam, P3–4', '9:10–10:20. Extra proctoring in your free period (ELA 9, Lift 3).'],
   ['2026-12-03', null, 'GE B2', '9AB7 speaking exam, P5–6', '10:30–11:40, in your normal 9AB7 lesson. 17 students in 70 minutes. Use a different question set from the Monday classes.'],
   ['2026-12-04', null, 'Exam duty', '9AB7 Maths exam, P7–8', '12:40–13:50, in your normal 9AB7 lesson. 9AB7 has no GE B2 lesson on 3 or 4 Dec.'],
-  ['2026-12-07', null, 'GE B2', 'Speaking: 9AB6 P3–4, 9AB4 P5–6, 9AB5 P7–8', 'All in your normal lesson slots. 9AB6 (23 students) 9:10–10:20; 9AB4 (22) 10:30–11:40; 9AB5 (18) 12:40–13:50. About 6–8 minutes per pair. Someone needs to supervise the students who are waiting.']
+  ['2026-12-07', null, 'GE B2', 'Speaking: 9AB6 P3–4, 9AB4 P5–6, 9AB5 P7–8', 'All in your normal lesson slots. 9AB6 (23 students) 9:10–10:20; 9AB4 (22) 10:30–11:40; 9AB5 (18) 12:40–13:50. About 6–8 minutes per pair. Someone needs to supervise the students who are waiting.'],
+  ['2026-12-09', null, 'Debate', 'No lesson: 7AD Vietnamese Literature exam, P3–4', '9:15–10:35, in your normal 7AD slot. No proctor is named on the sheet; under the "exam in your lesson slot, you proctor" rule that is you, so confirm with Mark. It ends 10:35, and 9AB4 are in their own exam until 10:40, so you can go straight to 9AB4.'],
+  ['2026-12-09', null, 'GE B2', '9AB4 P5–6 starts late (about 10:40)', 'Grade 9 sits Vietnamese Literature 9:10–10:40. About 60 minutes instead of 70.'],
+  ['2026-12-10', null, 'GE B2', '9AB7 P5–6 starts late (about 10:40)', 'Grade 9 sits Vietnamese Math 9:10–10:40. About 60 minutes instead of 70.']
 ];
 
 /* ===================================================================== */
